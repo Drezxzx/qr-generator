@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { saveAs } from "file-saver";
+import { IconX } from "@tabler/icons-react";
 
-export function GenerateQr({ url }: { url: string }) {
+export function GenerateQr({ url, setUrl }: { url: string, setUrl : React.Dispatch<React.SetStateAction<string>> }) {
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [hidden, setHidden] = useState<boolean>(false)
   
   useEffect(() => {
-    setHidden(false)
+    
     const generateQRCode = async () => {
       if (qrCanvasRef.current) {
         try {
-          // Generar el código QR en un canvas
           await QRCode.toCanvas(qrCanvasRef.current, url, { width: 256 });
         } catch (error) {
           console.error("Error al generar el código QR:", error);
@@ -22,16 +21,20 @@ export function GenerateQr({ url }: { url: string }) {
     generateQRCode();
   }, [url]);
 
+  const handleClick = ()=>{
+    setUrl("")
+  }
+
   useEffect(() => {
     document.addEventListener("click", (e)=>{
-        const elemnet = e.target as HTMLElement
-        if (elemnet.id !== "") {
-            setHidden(true)
+        const element = e.target as HTMLElement
+
+        if (element.id !== ""){
+            setUrl("")
         }
-        console.log(elemnet.id)
     })
-  
   }, [])
+  
   
   const handleDownload = () => {
     if (qrCanvasRef.current) {
@@ -54,7 +57,8 @@ export function GenerateQr({ url }: { url: string }) {
   };
 
   return (
-    <div id="qr" className={`${hidden ? "hidden" : ""} fixed top-0 left-0 w-full h-full animate-blurred-fade-in animate-duration-250 flex items-center justify-center bg-slate-800/50 backdrop-blur-lg`}>
+    <div id="qr" className={`fixed top-0 left-0 w-full h-full animate-blurred-fade-in animate-duration-250 flex items-center justify-center bg-slate-800/50 backdrop-blur-lg`}>
+        <IconX onClick={handleClick} className="absolute top-0 text-white size-10 right-0  hover:scale-110 transition-all cursor-pointer"></IconX>
       <div className="bg-white p-4 rounded-lg flex flex-col items-center shadow-lg">
         <canvas ref={qrCanvasRef} width={256} height={256} />
         <button
